@@ -1,42 +1,20 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Exploder : MonoBehaviour
 {
-    [SerializeField] private Spawner _spawner;
+    [SerializeField, Min(0)] private float _radiusExplosion = 1f;
+    [SerializeField, Min(0)] private float _forceExplosion = 300f;
 
-    [Space(10)]
-    [SerializeField] private float _explosionRadius = 1f;
-    [SerializeField] private float _explosionForce = 1000f;
-
-    private void OnEnable()
+    public void Explode(Vector3 center)
     {
-        _spawner.OnExplode += Explode;
-    }
+        Collider[] hits = Physics.OverlapSphere(center, _radiusExplosion);
 
-    private void OnDisable()
-    {
-        _spawner.OnExplode -= Explode;
-    }
-
-    private void Explode()
-    {
-        foreach (Rigidbody explodableObject in GetExplodableObjects())
-            explodableObject.AddExplosionForce(_explosionForce, transform.position, _explosionRadius);
-    }
-
-    private List<Rigidbody> GetExplodableObjects()
-    {
-        Collider[] hits = Physics.OverlapSphere(transform.position, _explosionRadius);
-
-        List<Rigidbody> rigidbodies = new();
-
-        foreach (Collider hit in hits)
+        foreach (var hit in hits)
         {
-            if (hit.attachedRigidbody != null)
-                rigidbodies.Add(hit.attachedRigidbody);
-        }
+            Rigidbody rigidbody = hit.attachedRigidbody;
 
-        return rigidbodies;
+            if (rigidbody != null)
+                rigidbody.AddExplosionForce(_forceExplosion, center, _radiusExplosion);
+        }
     }
 }

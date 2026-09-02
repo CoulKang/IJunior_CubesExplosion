@@ -1,46 +1,42 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    private const float MaxChance = 1f;
     private const float ChanceDivider = 0.5f;
+    private const float ScaleDivider = 0.5f;
 
-    [Space(10)]
-    [SerializeField, Range(0f, 1f)] private float _chanceSpawn = MaxChance;
-    [SerializeField, Min(0)] private int _minCountSpawn = 2;
-    [SerializeField, Min(1)] private int _maxCountSpawn = 6;
+    [SerializeField] private GameObject _cubePrefab;
+    [SerializeField] private Pallete _pallete;
 
-    public event System.Action OnSpawn;
-    public event System.Action OnExplode;
-
-    public float ChanceSpawn => _chanceSpawn;
-
-    public void ReduceChance(float previousChance)
+    public List<GameObject> SpawnCubes(Vector3 position, Vector3 parentScale, float parentChance, int minCount, int maxCount)
     {
-        _chanceSpawn = previousChance * ChanceDivider;
-    }
+        int count = Random.Range(minCount, maxCount + 1);
 
-    private void OnMouseUpAsButton()
-    {
-        Launch();
-    }
+        List<GameObject> spawned = new();
 
-    private void Launch()
-    {
-        float currentChance = Random.Range(0f, MaxChance);
-
-        if (currentChance <= _chanceSpawn)
+        for (int i = 0; i < count; i++)
         {
-            int currentCountSpawn = Random.Range(_minCountSpawn, _maxCountSpawn + 1);
+            Vector3 offset = Random.insideUnitSphere;
+            Vector3 spawnPos = position + offset;
 
-            for (int i = 0; i < currentCountSpawn; i++)
+            GameObject newCube = Instantiate(_cubePrefab, spawnPos, Quaternion.identity);
+
+            newCube.transform.localScale = parentScale * ScaleDivider;
+
+            Cube cubeComp = newCube.GetComponent<Cube>();
+
+            if (cubeComp != null)
             {
-                OnSpawn?.Invoke();
+                float newChance = parentChance * ChanceDivider;
+
+                cubeComp.SetChance(newChance);
+                cubeComp.Paint(_pallete.GetRandomColor());
             }
 
-            OnExplode?.Invoke();
+            spawned.Add(newCube);
         }
 
-        Destroy(gameObject);
+        return spawned;
     }
 }
