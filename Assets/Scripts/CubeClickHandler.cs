@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CubeClickHandler : MonoBehaviour
 {
+    [SerializeField] private Raycaster _raycaster;
     [SerializeField] private Spawner _spawner;
     [SerializeField] private Exploder _exploder;
 
@@ -13,18 +12,12 @@ public class CubeClickHandler : MonoBehaviour
 
     private void OnEnable()
     {
-        var raycaster = FindObjectOfType<Raycaster>();
-
-        if (raycaster != null)
-            raycaster.HitDetected += OnHitDetected;
+        _raycaster.HitDetected += OnHitDetected;
     }
 
     private void OnDisable()
     {
-        var raycaster = FindObjectOfType<Raycaster>();
-
-        if (raycaster != null)
-            raycaster.HitDetected -= OnHitDetected;
+        _raycaster.HitDetected -= OnHitDetected;
     }
 
     private void OnHitDetected(RaycastHit hit)
@@ -39,9 +32,9 @@ public class CubeClickHandler : MonoBehaviour
         if (Random.value <= chance)
         {
             _spawner.SpawnCubes(cube.transform.position, cube.transform.localScale, chance, _minSpawn, _maxSpawn);
-            
-            _exploder.Explode(cube.transform.position);
         }
+
+        _exploder.Explode(cube.transform.position);
 
         Destroy(cube.gameObject);
     }

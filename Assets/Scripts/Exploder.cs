@@ -7,14 +7,18 @@ public class Exploder : MonoBehaviour
 
     public void Explode(Vector3 center)
     {
-        Collider[] hits = Physics.OverlapSphere(center, _radiusExplosion);
+        float sizeFactor = 1f / Mathf.Max(transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        float totalRadius = _radiusExplosion * sizeFactor;
+        float totalForce = _forceExplosion * sizeFactor;
+
+        Collider[] hits = Physics.OverlapSphere(center, totalRadius);
 
         foreach (var hit in hits)
         {
             Rigidbody rigidbody = hit.attachedRigidbody;
 
             if (rigidbody != null)
-                rigidbody.AddExplosionForce(_forceExplosion, center, _radiusExplosion);
+                rigidbody.AddExplosionForce(totalForce, center, totalRadius);
         }
     }
 }
